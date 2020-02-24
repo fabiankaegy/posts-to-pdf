@@ -1,10 +1,10 @@
 {
   "name": "posts-to-pdf",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Automatically generate PDF's from WordPress Posts.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "posts-to-pdf": "node index.js"
   },
   "repository": {
     "type": "git",

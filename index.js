@@ -77,3 +77,5 @@ class Webpage {
         return ` - ${url}`;
     }
 }
+
+module.exports = program;
