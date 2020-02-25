@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/fabiankaegy/posts-to-pdf#readme",
   "dependencies": {
+    "chalk": "^3.0.0",
     "commander": "^4.1.1",
     "fs": "0.0.1-security",
     "node-fetch": "^2.6.0",
