@@ -1,58 +1,99 @@
 const fetch = require( 'node-fetch' );
 const program = require('commander');
+const { version } = require( './package.json' );
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 
 program
-  .requiredOption('-u, --url <string>', 'Url of the WordPress Site needs to be set')
-  .option('-d, --debug', 'output extra debugging')
-  .option('-o, --output', 'folder where the pdf`s should be saved', './')
-  .option('-f, --format <sting>', 'PDF Format size', 'A4');
+.version( version )
+    .name('posts-to-pdf')
+    .arguments('[url]')
+    .option('-d, --debug', 'output extra debugging')
+    .option('-o, --output', 'folder where the pdf`s should be saved', './')
+    .option('-f, --format <sting>', 'PDF Format size', 'A4')
+    .action( async function( url , { debug, output, format } ) {
 
-async function main() {
+        // debuging
+        if (debug) console.log(program.opts());
 
-    program.parse(process.argv);
+        try {
+            const posts = await getPosts( url );
 
-    // debuging
-    if (program.debug) console.log(program.opts());
-
-    try {
-        const posts = await getPosts( program.url );
-
-        console.info( "Generated PDF's:" )
-        posts.forEach( async ({link, slug}) => {
+            console.info( "Generated PDF's:" );
+            await posts.forEach( async function({ link, slug }) {
+                
+                console.log ( await Webpage.generatePDF( {
+                    url: link, 
+                    slug, 
+                    format: format 
+                }) );
             
-            console.log ( await Webpage.generatePDF( link, slug ) );
-        
-        } );
+            } );
 
 
-    } catch ( error ) {
-        console.error( error )
-    }
-}
-
-main();
- 
-
-
-
-async function getPosts ( url ) {
-
-    const postsUrl = `${url}/wp-json/wp/v2/posts?per_page=99`;
-
-    return await fetch( postsUrl ).then( response => {
-        if ( ! response.ok ) {
-            throw response.json();
+        } catch ( error ) {
+            console.error( error )
         }
-        return response.json();
     } )
+    .on( '--help', function() {
+		console.info( '' );
+		console.info( 'Examples:' );
+		console.info( `  $ ${ commandName }` );
+		console.info( `  $ ${ commandName } todo-list` );
+		console.info( `  $ ${ commandName } --template es5 todo-list` );
+	} )
+    .parse(process.argv);
+
+
+async function getPosts( url ) {
+
+    const postsUrl = `${url}/wp-json/wp/v2/posts?per_page=100`;
+       
+	const posts = await fetch( postsUrl )
+        .then( async function( response ) {
+            const pages = response.headers.get( 'x-wp-totalpages' );
+            
+            if ( response.ok ) {
+                return await loadMore( pages );
+            }
+            throw new TypeError( 'Oops, the format is not JSON.' );
+            }
+        );
+
+	// Load contact info, 100 posts at one time.
+	async function loadMore( pages ) {
+
+        const posts = await new Promise( async (resolve, reject) => {
+
+            let posts = [];
+            // Loop all pages, which was counted from the first REST API fetch.
+            for ( let page = 1; page <= pages; page++ ) {
+                
+                const allPosts = await fetch( `${postsUrl}&page=${page}` ).then( response => response.json() );
+                posts=[ ...posts, ...allPosts ];
+
+                if ( page == pages ) {
+                    resolve( posts );
+                }
+            }
+        } );
+        
+        return await posts;
+    }
+    
+    return posts;
+    
 }
 
 
 class Webpage {
-    static async generatePDF(url, slug, outputPath = process.cwd(),  format = 'A4') {
+    static async generatePDF( {
+        url, 
+        slug, 
+        outputPath = process.cwd(), 
+        format = 'A4'
+    }) {
         const browser = await puppeteer.launch({ headless: true }); // Puppeteer can only generate pdf in headless mode.
         const page = await browser.newPage();
         await page.goto(url, { waitUntil: 'networkidle2' }); // Adjust network idle as required. 

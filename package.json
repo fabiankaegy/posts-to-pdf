@@ -1,11 +1,10 @@
 {
   "name": "posts-to-pdf",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Automatically generate PDF's from WordPress Posts.",
   "main": "index.js",
-  "scripts": {
-    "posts-to-pdf": "node index.js"
-  },
+  "scripts": {},
+  "bin": "./index.js",
   "repository": {
     "type": "git",
     "url": "git+https://fabiankaegy@github.com/fabiankaegy/posts-to-pdf.git"
