@@ -1,6 +1,6 @@
 {
   "name": "posts-to-pdf",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Automatically generate PDF's from WordPress Posts.",
   "main": "index.js",
   "scripts": {},
@@ -9,7 +9,11 @@
     "type": "git",
     "url": "git+https://fabiankaegy@github.com/fabiankaegy/posts-to-pdf.git"
   },
-  "keywords": ["wordpress", "posts", "pdf"],
+  "keywords": [
+    "wordpress",
+    "posts",
+    "pdf"
+  ],
   "author": "Fabian Kägy",
   "license": "MIT",
   "bugs": {
